@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Бурмалда</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- "Сцена": рамка 16:9, внутри неё лежат все экраны -->
+  <div class="stage">
+        <!-- ЭКРАН 0: заставка с загрузкой -->
+    <section class="screen active" id="screen-splash">
+      <video class="splash-video" id="splash-video"
+             src="video/splash.mp4" autoplay muted playsinline></video>
+      <p class="splash-prompt" id="splash-prompt">Нажмите, чтобы продолжить</p>
+    </section>
+
+        <!-- ЭКРАН 1: старт -->
+      <section class="screen" id="screen-start">
+      <video class="bg bg-video" id="start-video"
+             src="video/start-loop.mp4" poster="images/start-poster.jpg"
+             muted loop playsinline></video>
+
+      <img class="cover-plate" src="images/cover-plate.png" alt="">
+      <img class="start-logo" src="images/logo-title.png" alt="PUBG Бурмалда">
+      <img class="start-copyright" src="images/text-copyright.png" alt="Все права защищены © 2026">
+      <img class="start-disclaimer" src="images/text-disclaimer.png"
+           alt="Нажимая кнопку «Играть» вы подтверждаете, что вы являетесь русским">
+
+      <button class="btn btn-play" id="btn-play">
+        <img src="images/btn-play.png" alt="Играть">
+      </button>
+    </section>
+
+    <!-- ЭКРАН 2: выбор скина -->
+    <section class="screen" id="screen-skins">
+      <img class="bg" src="images/skin-screen.png" alt="">
+
+      <button class="skin skin-1" data-skin="1"><img src="images/skin-1.png" alt="Скин 1"></button>
+      <button class="skin skin-2" data-skin="2"><img src="images/skin-2.png" alt="Скин 2"></button>
+      <button class="skin skin-3" data-skin="3"><img src="images/skin-3.png" alt="Скин 3"></button>
+      <button class="skin skin-4" data-skin="4"><img src="images/skin-4.png" alt="Скин 4"></button>
+
+      <button class="btn btn-ready" id="btn-ready" disabled>
+        <img src="images/btn-ready.png" alt="Готов">
+      </button>
+    </section>
+
+    <!-- ЭКРАН 2.5: видео с падением аирдропа -->
+    <section class="screen" id="screen-airdrop">
+      <video class="airdrop-video" id="airdrop-video"
+             src="video/airdrop.mp4" playsinline preload="auto"></video>
+    </section>
+
+    <!-- ЭКРАН 3: персонаж с репликой про 12 дропов -->
+    <section class="screen" id="screen-intro">
+      <img class="bg" src="images/blurry-background.png" alt="">
+      <!--<img class="intro-logo" src="images/logo-small.png" alt="PUBG Бурмалда"> -->
+      <img class="intro-skin" id="intro-skin" src="" alt="Выбранный скин">
+      <img class="intro-bubble" src="images/speech-bubble.png"
+           alt="Вау!! Мне упало сразу 12 дропов! Интересно, что же там внутри???">
+      <button class="btn btn-look" id="btn-look">
+        <img src="images/btn-look.png" alt="Осмотреться">
+      </button>
+    </section>
+
+    <button class="music-btn" id="music-btn" aria-label="Звук" hidden>🔊</button>
+    <audio id="ambient" src="audio/ambient.mp3" loop preload="auto"></audio>
+    <audio id="music" src="audio/ambient.mp3" loop preload="auto"></audio>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

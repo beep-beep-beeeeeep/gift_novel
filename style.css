@@ -1,0 +1,342 @@
+/* Сбрасываем лишние отступы браузера */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  background: #000;   /* чёрные полосы, если экран не 16:9 */
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Сцена всегда 16:9 и вписывается в окно целиком */
+.stage {
+  position: relative;
+  width: min(100vw, calc(100vh * 16 / 9));
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+/* Экраны лежат друг на друге, видим только активный */
+.screen {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s;
+}
+
+.screen.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Фоновая картинка */
+.bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ---------- Кнопки ---------- */
+.btn {
+  position: absolute;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: transform 0.15s, filter 0.15s, opacity 0.3s;
+}
+
+.btn img {
+  display: block;
+  width: 100%;
+}
+
+.btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  filter: brightness(1.15);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Неактивная кнопка (пока не выбран скин) */
+.btn:disabled {
+  opacity: 0.4;
+  filter: grayscale(1);
+  cursor: not-allowed;
+}
+
+/* Положение и размер кнопок (в процентах от сцены) */
+.btn-play  { left: 40.9%; top: 73.3%; width: 18.2%; }
+.btn-ready { left: 40.9%; top: 86.3%; width: 18.2%; }
+.btn-look  { left: 52.9%; top: 77.1%; width: 18.2%; }
+
+/* ---------- Карточки скинов ---------- */
+.skin {
+  position: absolute;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: transform 0.25s, filter 0.25s;
+}
+
+.skin img {
+  display: block;
+  width: 100%;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Положение карточек, как в макете */
+.skin-1 { left: 9.05%; top: 20.7%; width: 22.1%; }
+.skin-2 { left: 31.2%; top: 24.2%; width: 18.8%; }
+.skin-3 { left: 50.9%; top: 24.8%; width: 19.8%; }
+.skin-4 { left: 69.4%; top: 18.1%; width: 19.8%; }
+
+.skin:hover {
+  transform: scale(1.03);
+}
+
+/* Когда скин выбран, остальные слегка затемняются */
+#screen-skins.has-choice .skin:not(.selected) {
+  filter: brightness(0.55);
+}
+
+/* Выбранная карточка: жёлтое свечение и небольшое увеличение */
+.skin.selected {
+  transform: scale(1.06);
+  z-index: 2;
+  filter: drop-shadow(0 0 10px #f5d80f) drop-shadow(0 0 26px rgba(245, 216, 15, 0.7));
+}
+
+/* ---------- Экран 3: персонаж и реплика ---------- */
+
+/* До начала анимации все эти элементы невидимы */
+.intro-logo {
+  position: absolute;
+  left: 42%;
+  top: 7.1%;
+  width: 16%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-skin {
+  position: absolute;
+  left: 11%;
+  bottom: 0;
+  height: 70%;
+  opacity: 0;
+  user-select: none;
+  pointer-events: none;
+}
+
+.intro-bubble {
+  position: absolute;
+  left: 36.1%;
+  top: 33.1%;
+  width: 42.9%;
+  opacity: 0;
+  transform-origin: 0% 50%;   /* реплика "вырастает" от хвостика */
+  user-select: none;
+  pointer-events: none;
+}
+
+.btn-look {
+  opacity: 0;
+}
+
+/* Когда экран показан, всё появляется по очереди */
+#screen-intro.active .intro-logo {
+  animation: fadeIn 0.8s ease 0.2s forwards;
+}
+
+#screen-intro.active .intro-skin {
+  animation: slideIn 0.7s ease 0.4s forwards;
+}
+
+#screen-intro.active .intro-bubble {
+  animation: popIn 0.5s ease 1.2s forwards;
+}
+
+#screen-intro.active .btn-look {
+  animation: fadeIn 0.6s ease 1.9s forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ---------- Экран 1: видео и объекты поверх него ---------- */
+.bg-video {
+  background: #1a1008;   /* цвет, пока видео не загрузилось */
+}
+
+.start-logo {
+  position: absolute;
+  left: 22.9%;
+  top: 17.6%;
+  width: 54.2%;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.start-copyright {
+  position: absolute;
+  left: 39.9%;
+  top: 89%;
+  width: 20.3%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.start-disclaimer {
+  position: absolute;
+  left: 41%;
+  top: 92.3%;
+  width: 18%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.btn-play {
+  opacity: 0;
+}
+
+/* Появляются по очереди: логотип, потом кнопка, потом мелкий текст */
+#screen-start.active .start-logo {
+  animation: fadeIn 1s ease 0.3s forwards;
+}
+
+#screen-start.active .btn-play {
+  animation: fadeIn 0.8s ease 1.1s forwards;
+}
+
+#screen-start.active .start-copyright,
+#screen-start.active .start-disclaimer {
+  animation: fadeIn 0.8s ease 1.5s forwards;
+}
+
+.cover-plate {
+  position: absolute;
+  right: 0.8%;
+  bottom: 2%;
+  width: 14%;
+  pointer-events: none;
+}
+/* ---------- Кнопка музыки ---------- */
+.music-btn {
+  position: absolute;
+  right: 2%;
+  top: 3%;
+  width: 3.2vw;
+  height: 3.2vw;
+  min-width: 36px;
+  min-height: 36px;
+  font-size: 1.6vw;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  z-index: 10;
+    /* на стартовом экране кнопки нет, она появляется после "ИГРАТЬ" */
+}
+
+
+
+.music-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+/* ---------- Экран 0: заставка ---------- */
+#screen-splash {
+  background: #000;
+  cursor: pointer;
+}
+
+.splash-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 0.8s ease;
+}
+
+/* Когда видео закончилось, оно плавно гаснет, остаётся чёрный экран */
+.splash-video.done {
+  opacity: 0;
+}
+
+.splash-prompt {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  color: #fff;
+  font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif;
+  font-size: 2vw;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-prompt.visible {
+  animation: blink 1.4s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0.15; }
+  50%      { opacity: 1; }
+}
+/* ---------- Экран с видео про аирдроп ---------- */
+#screen-airdrop {
+  background: #000;
+}
+
+.airdrop-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;   /* чёрные полосы сверху и снизу; "cover" заполнит весь экран, но обрежет края */
+}
+
+/* Плавный переход: экран с репликой проявляется медленно (1,2 с),
+   а видео уходит только после этого */
+#screen-intro {
+  transition: opacity 1.2s ease, visibility 1.2s;
+}
+
+#screen-airdrop:not(.active) {
+  transition: opacity 0.4s ease 1.2s, visibility 0s linear 1.6s;
+}
