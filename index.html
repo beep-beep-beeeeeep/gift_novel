@@ -10,15 +10,16 @@
 
   <!-- "Сцена": рамка 16:9, внутри неё лежат все экраны -->
   <div class="stage">
-        <!-- ЭКРАН 0: заставка с загрузкой -->
+
+    <!-- ЭКРАН 0: заставка с загрузкой -->
     <section class="screen active" id="screen-splash">
       <video class="splash-video" id="splash-video"
              src="video/splash.mp4" autoplay muted playsinline></video>
       <p class="splash-prompt" id="splash-prompt">Нажмите, чтобы продолжить</p>
     </section>
 
-        <!-- ЭКРАН 1: старт -->
-      <section class="screen" id="screen-start">
+    <!-- ЭКРАН 1: старт -->
+    <section class="screen" id="screen-start">
       <video class="bg bg-video" id="start-video"
              src="video/start-loop.mp4" poster="images/start-poster.jpg"
              muted loop playsinline></video>
@@ -57,7 +58,6 @@
     <!-- ЭКРАН 3: персонаж с репликой про 12 дропов -->
     <section class="screen" id="screen-intro">
       <img class="bg" src="images/blurry-background.png" alt="">
-      <!--<img class="intro-logo" src="images/logo-small.png" alt="PUBG Бурмалда"> -->
       <img class="intro-skin" id="intro-skin" src="" alt="Выбранный скин">
       <img class="intro-bubble" src="images/speech-bubble.png"
            alt="Вау!! Мне упало сразу 12 дропов! Интересно, что же там внутри???">
@@ -66,9 +66,52 @@
       </button>
     </section>
 
+    <!-- ЭКРАН 4: 12 подарков (сами кнопки-подарки создаёт script.js) -->
+    <section class="screen" id="screen-gifts">
+      <img class="bg" src="images/gifts-bg.png" alt="">
+      <img class="gifts-logo" src="images/logo-title.png" alt="PUBG Бурмалда">
+      <p class="gifts-hint">Чтобы выбрать дроп, выберите его</p>
+    </section>
+
+    <!-- ЭКРАН 5: содержимое подарка -->
+    <section class="screen" id="screen-reveal">
+      <img class="bg" src="images/reveal-bg.png" alt="">
+      <img class="reveal-logo" src="images/logo-title.png" alt="PUBG Бурмалда">
+      <div class="reveal-rays"></div>
+      <img class="reveal-prize" id="reveal-prize" src="" alt="">
+      <img class="lag-icon" id="lag-icon" src="images/network-lag.png" alt="Network lag detected">
+      <div class="reveal-flash"></div>
+      <button class="btn btn-take" id="btn-take" disabled>
+        <img src="images/btn-take.png" alt="Забрать">
+      </button>
+    </section>
+
+    <!-- ЭКРАН 6: финал -->
+    <section class="screen" id="screen-final">
+      <img class="bg" src="images/final-bg.png" alt="">
+      <button class="btn btn-lobby" id="btn-lobby">
+        <img src="images/btn-to-lobby.png" alt="В лобби">
+      </button>
+    </section>
+
+    <!-- ЭКРАН 7: лобби (конечный экран) -->
+    <section class="screen" id="screen-lobby">
+      <img class="bg" src="images/lobby-bg.png" alt="">
+      <img class="lobby-skin" id="lobby-skin" src="" alt="Твой скин">
+
+      <!-- Плашка поиска матча -->
+      <div class="match-bar" id="match-bar">
+        <img src="images/match-bar.png" alt="Поиск матча">
+        <b class="match-timer" id="match-timer">0:50</b>
+      </div>
+    </section>
+
+    <div class="blackout" id="blackout"></div>
+
     <button class="music-btn" id="music-btn" aria-label="Звук" hidden>🔊</button>
     <audio id="ambient" src="audio/ambient.mp3" loop preload="auto"></audio>
-    <audio id="music" src="audio/ambient.mp3" loop preload="auto"></audio>
+    <audio id="music" src="audio/final.mp3" loop preload="auto"></audio>
+    <audio id="lobby-music" src="audio/last-track.mp3" loop preload="auto"></audio>
   </div>
 
   <script src="script.js"></script>
