@@ -199,10 +199,19 @@ const prizeTypes = [
   'simple', 'simple', 'simple',  // 4, 5, 6
   'gold',                        // 7
   'simple', 'simple',            // 8, 9
-  'gold',                        // 10
+  'gold',                        // 10f
   'simple',                      // 11
   'gold'                         // 12
 ];
+
+// Заранее загружаем картинки призов, чтобы они не мигали
+for (let i = 1; i <= prizeTypes.length; i++) {
+  const img = new Image();
+  img.src = 'images/prize-' + i + '.png';
+}
+new Image().src = 'images/gift-opened.png';
+new Image().src = 'images/btn-restart.png';
+new Image().src = 'images/network-lag.png';
 
 let openedCount = 0;    // сколько подарков уже открыто
 let currentGift = null; // какую коробку сейчас открываем
