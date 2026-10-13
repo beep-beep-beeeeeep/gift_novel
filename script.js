@@ -29,11 +29,11 @@ function showScreen(id) {
 
 // ---------- Звуки ----------
 const ambient = document.getElementById('ambient');   // ветер: стартовый экран и выбор скина
-const music = document.getElementById('music');
-const lobbyMusic = document.getElementById('lobby-music');   // last-track
+const music = document.getElementById('music');       // музыка (подключим позже)
+const lobbyMusic = document.getElementById('lobby-music');   // музыка в лобби (поиск матча)
 const musicBtn = document.getElementById('music-btn');
 
-ambient.volume = 1;
+ambient.volume = 1;   // громкость от 0 до 1, при желании поменяйте
 music.volume = 0.5;
 lobbyMusic.volume = 0.5;
 
@@ -54,29 +54,58 @@ musicBtn.addEventListener('click', function () {
 applyMute();
 
 // ---------- Звуки кнопок: клик и наведение ----------
-const clickSound = new Audio('audio/click.mp3');
-const hoverSound = new Audio('audio/hover.mp3');
-clickSound.preload = 'auto';
-hoverSound.preload = 'auto';
+// Короткие звуки через Web Audio (работает и в Safari)
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioCtx();
+const buffers = {};
+
+function loadSound(name, src) {
+  fetch(src)
+    .then(function (r) { return r.arrayBuffer(); })
+    .then(function (data) {
+      return new Promise(function (resolve, reject) {
+        audioCtx.decodeAudioData(data, resolve, reject);
+      });
+    })
+    .then(function (buffer) { buffers[name] = buffer; })
+    .catch(function (err) { console.log('Не загрузился звук ' + src + ':', err); });
+}
+
+loadSound('click', 'audio/click.mp3');
+loadSound('hover', 'audio/hover.mp3');
+loadSound('gold', 'audio/gold.mp3');
+loadSound('simple', 'audio/simple.mp3');
+loadSound('start', 'audio/start-game.mp3');
+
+// Safari включает звук только после действия игрока
+['pointerdown', 'click', 'keydown'].forEach(function (evt) {
+  document.addEventListener(evt, function () {
+    if (audioCtx.state !== 'running') audioCtx.resume();
+  });
+});
+
+function playBuffer(name, volume, onEnded) {
+  if (state.muted || !buffers[name]) return null;
+  if (audioCtx.state !== 'running') audioCtx.resume();
+  const source = audioCtx.createBufferSource();
+  const gain = audioCtx.createGain();
+  source.buffer = buffers[name];
+  gain.gain.value = volume;
+  source.connect(gain);
+  gain.connect(audioCtx.destination);
+  if (onEnded) source.onended = onEnded;
+  source.start(0);
+  return source;
+}
 
 let lastHover = 0;   // когда последний раз играл звук наведения
-
-// Каждый раз играем новую копию, чтобы звуки не обрывали друг друга
-function playUi(sound, volume) {
-  if (state.muted) return;
-  const copy = sound.cloneNode();
-  copy.volume = volume;
-  copy.play().catch(function (err) {
-    console.log('Звук не сыграл:', err.message);
-  });
-}
 
 // Всё, что считается кнопкой
 const clickable = '.btn, .skin, .gift, .music-btn';
 
 document.addEventListener('click', function (e) {
   const el = e.target.closest(clickable);
-  if (el && !el.disabled) playUi(clickSound, 1);
+  if (el && !el.disabled) playBuffer('click', 1);
 });
 
 document.addEventListener('mouseover', function (e) {
@@ -87,17 +116,8 @@ document.addEventListener('mouseover', function (e) {
   const now = Date.now();
   if (now - lastHover < 150) return;          // не чаще раза в 0,15 с
   lastHover = now;
-  playUi(hoverSound, 1);
+  playBuffer('hover', 1);
 });
-
-// Разовый звук (открытие подарка): звук выключен -> молчим
-function playSfx(src) {
-  if (state.muted) return;
-  const a = new Audio(src);
-  a.play().catch(function (err) {
-    console.log('Звук не сыграл:', err.message);
-  });
-}
 
 // Плавно убавить громкость и остановить
 function fadeOut(audio, ms) {
@@ -199,15 +219,14 @@ const prizeTypes = [
   'simple', 'simple', 'simple',  // 4, 5, 6
   'gold',                        // 7
   'simple', 'simple',            // 8, 9
-  'gold',                        // 10f
+  'gold',                        // 10
   'simple',                      // 11
   'gold'                         // 12
 ];
 
-// Заранее загружаем картинки призов, чтобы они не мигали
+// Заранее загружаем картинки, чтобы они не мигали
 for (let i = 1; i <= prizeTypes.length; i++) {
-  const img = new Image();
-  img.src = 'images/prize-' + i + '.png';
+  new Image().src = 'images/prize-' + i + '.png';
 }
 new Image().src = 'images/gift-opened.png';
 new Image().src = 'images/btn-restart.png';
@@ -240,15 +259,16 @@ function openGift(index) {
   btnTakeImg.src = 'images/btn-take.png';
   revealScreen.dataset.prize = openedCount + 1;   // номер подарка для индивидуальной подстройки
 
-  document.getElementById('reveal-prize').src =
-    'images/prize-' + (openedCount + 1) + '.png';
+  const prizeImg = document.getElementById('reveal-prize');
+  prizeImg.removeAttribute('src');   // убираем старую картинку
+  prizeImg.src = 'images/prize-' + (openedCount + 1) + '.png';
 
   revealScreen.classList.toggle('gold', type === 'gold');
   giftsScreen.classList.add('seen');   // при возврате подарки не появляются заново
 
   btnTake.disabled = true;             // "Забрать" включится, когда анимация доиграет
   showScreen('screen-reveal');
-  playSfx(type === 'gold' ? 'audio/gold.mp3' : 'audio/simple.mp3');
+  playBuffer(type === 'gold' ? 'gold' : 'simple', 1);
   // Золотой: кнопка включается после появления предмета (3,3 с + анимация)
   setTimeout(function () { btnTake.disabled = false; }, type === 'gold' ? 4800 : 1400);
 }
@@ -354,19 +374,31 @@ btnLobby.addEventListener('click', function () {
   if (!btnLobby.classList.contains('ready')) return;
   btnLobby.classList.remove('ready');   // второй клик не сработает
 
+  // Разблокировка для Safari: разрешаем музыке лобби играть позже
+  lobbyMusic.play().then(function () {
+    lobbyMusic.pause();
+    lobbyMusic.currentTime = 0;
+  }).catch(function () {});
+
   fadeThroughBlack(function () {
     document.getElementById('lobby-skin').src =
       'images/skin-' + state.skin + '-' + state.skin + '.png';
     showScreen('screen-lobby');
 
-    // Звук старта матча
-    if (!state.muted) {
-      const startSfx = new Audio('audio/start-game.mp3');
-      startSfx.volume = 1;
-      startSfx.play().catch(function (err) {
-        console.log('Звук старта не сыграл:', err.message);
+    // Музыка финала обрывается (экран уже чёрный)
+    music.pause();
+
+    // Запустить last-track.mp3 по кругу
+    function startLobbyMusic() {
+      lobbyMusic.currentTime = 0;
+      lobbyMusic.play().catch(function (err) {
+        console.log('Музыка лобби не сыграла:', err.message);
       });
     }
+
+    // Сначала звук старта матча, когда он закончится, играет last-track
+    const startSource = playBuffer('start', 1, startLobbyMusic);
+    if (!startSource) startLobbyMusic();   // звук выключен или не загрузился
 
     // Плашка поиска матча + таймер на 600 секунд
     startMatchTimer(10 * 60);
